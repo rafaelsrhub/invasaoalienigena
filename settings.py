@@ -6,3 +6,5 @@ class Settings:
         '''tela, altura'''
         self.screen_heigth = (800)
         self.bg_color = (130,130,130)
+        self.ship_speed=1.5 
+    
