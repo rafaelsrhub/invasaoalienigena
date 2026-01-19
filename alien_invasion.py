@@ -3,6 +3,7 @@ import pygame
 from settings import Settings
 from ship import Ship
 from bullet import Bullet
+from alien import Alien
 
 class AlienInvasion:
     '''classe geral para gerencia ativos do jogo'''
@@ -14,14 +15,18 @@ class AlienInvasion:
         self.settings = Settings()
 
         self.screen= pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+        #ajusta o bg e a resolução do jogo!
         self.settings.screen_width = self.screen.get_rect().width
         self.settings.screen_height = self.screen.get_rect().height
+        #ajusta exclusivamente o bg com a resolução disponivel!
         self.settings.bg_image = pygame.transform.scale(self.settings.bg_image, 
         (self.settings.screen_width, self.settings.screen_height))
         pygame.display.set_caption("Alien Invasion")
         '''importa a nave para acessar os conteudos do jogo '''
         self.ship = Ship(self)
-        self.bullets = pygame.sprite.Group()
+        self.bullets = pygame.sprite.Group()# usamos o metodo sprite.group pois queremos administrar mais de um item simultaneamente
+        self.aliens= pygame.sprite.Group()
+        self.create_fleet()# usamos creat flit para criar e administrar uma frota
 
     
     def run_game(self):        
@@ -56,7 +61,9 @@ class AlienInvasion:
             elif event.type == pygame.KEYUP:
                 self.check_keyup_events(event)
                 #transfere o loop para uma lista de eventos que serão checkados
-            #mover para a esquerda
+            #mover para a esquerda    
+    
+    #checa eventos de pressionar tecla
     def check_keydown_events(self, event):
         if event.key == pygame.K_q:
             sys.exit()
@@ -66,30 +73,48 @@ class AlienInvasion:
             self.ship.moving_left = True
         elif event.key == pygame.K_SPACE:
             self.fire_bullet()    
-        
+
+    #checa eventos de soltar teclas    
     def check_keyup_events(self, event):
         if event.key == pygame.K_RIGHT:
             self.ship.moving_right = False
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = False
     
+    def create_fleet(self):
+        alien = Alien(self)
+        #agora vamos trabalhar em mais alienigenas na frota
+        alien_width = alien.rect.width
+        current_x = alien_width
+        while current_x <(self.settings.screen_width- 2*alien_width):
+            new_alien = Alien(self)
+            new_alien.x = current_x
+            new_alien.rect.x = current_x
+            self.aliens.add(new_alien)
+            current_x += alien_width
+        
+
+    #cria o tiro na tela
     def fire_bullet(self):
         if len(self.bullets) < self.settings.bullet_limit:    
             new_bullet = Bullet(self)
             self.bullets.add(new_bullet)
 
+    #atualiza cada posição do tiro!
     def update_bullets(self):
         for bullet in self.bullets.copy():
             if bullet.rect.bottom <=0:
                     self.bullets.remove(bullet)
 
+    #atualiza a imagem de fundo sempre que necessario!
     def update_screen(self):   
         self.screen.blit(self.settings.bg_image, (0, 0))
         '''Coloca a espaçonave na tela com o blitme'''
         for bullet in self.bullets.sprites():
             bullet.draw_bullet()
         self.ship.blitme()
-
+        self.aliens.draw(self.screen)
+        
         pygame.display.flip() 
 
 if __name__ == '__main__':
