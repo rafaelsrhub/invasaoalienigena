@@ -37,6 +37,8 @@ class AlienInvasion:
             self.ship.update() #atualiza a posição da nave
             self.bullets.update() #atualiza a posição das balas
             self.update_bullets()
+            #atualiza a posição dos aliens
+            self.update_aliens()
             #descarta os projeteis quando nao são mais utilizados
             
                 #pode ser usado a função print aqui para saber se as balas estão sendo deletadas da tela
@@ -81,19 +83,43 @@ class AlienInvasion:
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = False
     
+    def create_alien(self, x_position, y_position):
+        #Cria um alienigena e o posiciona na fileira    
+        new_alien = Alien(self)
+        new_alien.x = x_position
+        new_alien.rect.x = x_position
+        new_alien.rect.y = y_position
+        self.aliens.add(new_alien)
+
     def create_fleet(self):
         alien = Alien(self)
+        alien_width,alien_height = alien.rect.size
         #agora vamos trabalhar em mais alienigenas na frota
         alien_width = alien.rect.width
-        current_x = alien_width
-        while current_x <(self.settings.screen_width- 2*alien_width):
-            new_alien = Alien(self)
-            new_alien.x = current_x
-            new_alien.rect.x = current_x
-            self.aliens.add(new_alien)
-            current_x += alien_width
-        
 
+        current_x,current_y = alien_width,alien_height
+        while current_y < (self.settings.screen_height - 3* alien_height):
+            while current_x < (self.settings.screen_width - 2*alien_width):
+                self.create_alien(current_x, current_y)
+                current_x += 2*alien_width
+            current_x = alien_width
+            current_y += 2*alien_height
+
+    #função que ativa a movimentação dos aliens na tela
+    def update_aliens(self):
+        self.aliens.update()
+        self.check_fleet_edges()
+    
+    def check_fleet_edges(self):
+        for alien in self.aliens.sprites():
+            if alien.check_edges():
+                self.change_fleet_direction()
+                break
+    
+    def change_fleet_direction(self):
+        for alien in self.aliens.sprites():
+            alien.rect.y += self.settings.fleet_drop_speed
+        self.settings.fleet_direction *= -1
     #cria o tiro na tela
     def fire_bullet(self):
         if len(self.bullets) < self.settings.bullet_limit:    
