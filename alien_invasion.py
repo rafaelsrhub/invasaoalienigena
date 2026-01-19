@@ -2,6 +2,7 @@ import sys
 import pygame
 from settings import Settings
 from ship import Ship
+from bullet import Bullet
 
 class AlienInvasion:
     '''classe geral para gerencia ativos do jogo'''
@@ -19,14 +20,24 @@ class AlienInvasion:
         (self.settings.screen_width, self.settings.screen_height))
         pygame.display.set_caption("Alien Invasion")
         '''importa a nave para acessar os conteudos do jogo '''
-        self.ship= Ship(self)
+        self.ship = Ship(self)
+        self.bullets = pygame.sprite.Group()
+
     
     def run_game(self):        
         '''inicia o loop principal do jogo'''
         while True:
             '''checa os comandos a serem executados na janela do jogo'''
-            self.check_events()
-            self.ship.update()
+            self.check_events() #verifica eventos de teclado e mouse
+            self.ship.update() #atualiza a posição da nave
+            self.bullets.update() #atualiza a posição das balas
+            self.update_bullets()
+            #descarta os projeteis quando nao são mais utilizados
+            
+                #pode ser usado a função print aqui para saber se as balas estão sendo deletadas da tela
+                #print(len(self.bullets))
+                
+
             #olha eventos de teclado e mouse
             self.update_screen()
             self.clock.tick(60)
@@ -53,20 +64,33 @@ class AlienInvasion:
             self.ship.moving_right = True
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = True
-
+        elif event.key == pygame.K_SPACE:
+            self.fire_bullet()    
+        
     def check_keyup_events(self, event):
         if event.key == pygame.K_RIGHT:
             self.ship.moving_right = False
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = False
-            
+    
+    def fire_bullet(self):
+        if len(self.bullets) < self.settings.bullet_limit:    
+            new_bullet = Bullet(self)
+            self.bullets.add(new_bullet)
+
+    def update_bullets(self):
+        for bullet in self.bullets.copy():
+            if bullet.rect.bottom <=0:
+                    self.bullets.remove(bullet)
+
     def update_screen(self):   
         self.screen.blit(self.settings.bg_image, (0, 0))
         '''Coloca a espaçonave na tela com o blitme'''
+        for bullet in self.bullets.sprites():
+            bullet.draw_bullet()
         self.ship.blitme()
 
         pygame.display.flip() 
-
 
 if __name__ == '__main__':
     '''Cria uma instância do jogo e executa ele'''
