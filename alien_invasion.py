@@ -12,7 +12,11 @@ class AlienInvasion:
         self.clock=pygame.time.Clock()
         self.settings = Settings()
 
-        self.screen= pygame.display.set_mode((self.settings.screen_width, self.settings.screen_heigth))
+        self.screen= pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+        self.settings.screen_width = self.screen.get_rect().width
+        self.settings.screen_height = self.screen.get_rect().height
+        self.settings.bg_image = pygame.transform.scale(self.settings.bg_image, 
+        (self.settings.screen_width, self.settings.screen_height))
         pygame.display.set_caption("Alien Invasion")
         '''importa a nave para acessar os conteudos do jogo '''
         self.ship= Ship(self)
@@ -20,7 +24,7 @@ class AlienInvasion:
     def run_game(self):        
         '''inicia o loop principal do jogo'''
         while True:
-            '''checa primeiro se a algum comando para fechar a janela'''
+            '''checa os comandos a serem executados na janela do jogo'''
             self.check_events()
             self.ship.update()
             #olha eventos de teclado e mouse
@@ -35,22 +39,29 @@ class AlienInvasion:
             #mover para a direita   
             #inicia o loop para que a nave fique indo para a direita ou para a esquerda
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RIGHT:
-                    self.ship.moving_right = True
-                elif event.key == pygame.K_LEFT:
-                    self.ship.moving_left = True
+                self.check_keydown_events(event)
+                #transfere o loop para uma lista de eventos que serão checkados
             #corta o loop quando a tecla para de ser pressionada
             elif event.type == pygame.KEYUP:
-                if event.key == pygame.K_RIGHT: 
-                    self.ship.moving_right = False
-                elif event.key == pygame.K_LEFT:
-                    self.ship.moving_left = False
+                self.check_keyup_events(event)
+                #transfere o loop para uma lista de eventos que serão checkados
             #mover para a esquerda
-            
+    def check_keydown_events(self, event):
+        if event.key == pygame.K_q:
+            sys.exit()
+        elif event.key == pygame.K_RIGHT:
+            self.ship.moving_right = True
+        elif event.key == pygame.K_LEFT:
+            self.ship.moving_left = True
 
-                    
+    def check_keyup_events(self, event):
+        if event.key == pygame.K_RIGHT:
+            self.ship.moving_right = False
+        elif event.key == pygame.K_LEFT:
+            self.ship.moving_left = False
+            
     def update_screen(self):   
-        self.screen.fill(self.settings.bg_color)
+        self.screen.blit(self.settings.bg_image, (0, 0))
         '''Coloca a espaçonave na tela com o blitme'''
         self.ship.blitme()
 

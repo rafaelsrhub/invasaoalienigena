@@ -5,7 +5,7 @@ class Ship:
     def __init__ (self, ai_game):
         '''inicia a nave na tela e define sua posição inicial'''
         self.screen = ai_game.screen
-        self.settings=ai_game.settings
+        self.settings = ai_game.settings
         self.screen_rect = ai_game.screen.get_rect()
 
         '''sobe a imagem da espaçonave e obtem suas dimensoes'''
