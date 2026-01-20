@@ -96,7 +96,6 @@ class AlienInvasion:
         alien_width,alien_height = alien.rect.size
         #agora vamos trabalhar em mais alienigenas na frota
         alien_width = alien.rect.width
-
         current_x,current_y = alien_width,alien_height
         while current_y < (self.settings.screen_height - 3* alien_height):
             while current_x < (self.settings.screen_width - 2*alien_width):
@@ -108,8 +107,10 @@ class AlienInvasion:
     #função que ativa a movimentação dos aliens na tela
     def update_aliens(self):
         self.aliens.update()
+        #detecta colisoes entre a nave e os aliens
+        if pygame.sprite.spritecollideany(self.ship,self.aliens):
+            print("Damage!!!")   
         self.check_fleet_edges()
-    
     def check_fleet_edges(self):
         for alien in self.aliens.sprites():
             if alien.check_edges():
@@ -131,6 +132,16 @@ class AlienInvasion:
         for bullet in self.bullets.copy():
             if bullet.rect.bottom <=0:
                     self.bullets.remove(bullet)
+        if not self.aliens:
+            self.bullets.empty()
+            self.create_fleet()
+        self.check_bullet_alien_collision()
+
+    def check_bullet_alien_collision(self):
+        #vamos verificar a colisão de projeteis e descartalos
+        # quando colidir!            
+        collisions= pygame.sprite.groupcollide(
+            self.bullets, self.aliens, True, True)
 
     #atualiza a imagem de fundo sempre que necessario!
     def update_screen(self):   
